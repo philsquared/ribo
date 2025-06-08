@@ -27,6 +27,18 @@ let i = 42 # <-- the code to the left is evaluated, but this comment is ignored
 Ribo has a set of built-in types, similar to JSON, with the addition of datetime types:
 
 ```
+booleans = true
+integers = 42
+floats = 3.141
+strings = "hello"
+dates = 2018/05/15
+times = 19:16:00Z
+datetimes = 2018/05/15T19:16:00Z
+```
+
+Unlike, JSON, however, these are static types, and can be explicitly annotated:
+
+```
 booleans: bool = true
 integers: int = 42
 floats: float = 3.141
@@ -36,20 +48,8 @@ times: time = 19:16:00Z
 datetimes: datetime = 2018/05/15T19:16:00Z
 ```
 
-Like many modern programming languages, 
-Ribo uses type annotations, where the type follows the variable name, after a colon.
+With type inference you'll rarely have to specify types where it wouldn't otherwise be needed.
 
-But don't let those types put you off. Just like most of those same languages, Ribo has type inference, so the same examples can be written:
-
-```
-booleans = true
-integers = 42
-floats = 3.141
-strings = "hello"
-datese = 2018/05/15
-times = 19:16:00Z
-datetimes = 2018/05/15T19:16:00Z
-```
 
 Ribo also supports four container types:
 
