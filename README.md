@@ -1,6 +1,6 @@
 # Ribo
 
-<div style="display:flex; justify-content: center; width: 100%;">
+<div align="center">
     <img src="ribo.png" style="width:120px">
 </div>
 
