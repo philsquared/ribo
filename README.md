@@ -1,6 +1,8 @@
 # Ribo
 
-<img src="ribo.png" style="width:100px; margin:0 auto">
+<div style="display:flex; justify-content: center; width: 100%;">
+    <img src="ribo.png" style="width:120px">
+</div>
 
 Ribo is a declarative programming language. 
 Think something like JSON or YAML - but with types. And nicer.
