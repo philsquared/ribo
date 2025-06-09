@@ -159,12 +159,16 @@ type Contact:
     | Email: str
     
 let contact1 = Contact.None
-let contact2 = Contact.Phone(area=123, number=4567890)
-let contact3 : Contact = .Email("abc@example.com")
-let contact3b : Contact.Email = "abc@example.com"
+let contact2 = Contact.Phone(123, 4567890)
+let contact3 : Contact.Email = "abc@example.com"
+let contact4 : Contact = .Email("abc@example.com")
 ```
 
-Notice the type inference at play at multiple levels.
+Notice the type inference at play at multiple levels. With Phone we infer the whole type from the constructor.
+With Email, for contact3, we annotate the qualified subtype, so supply just the arguments (round brackets optional).
+For contact4 we annotate just the Sum type, so need to specify the subtype for the constructor. 
+The subtype is Contact.Email but we can use partial inference (with the leading `.`) to elide the Contact.
+
 Notice, also, that we can define product types inline (the type of Phone), without needing to create a type binding up front.
 
 So Sum Types are just compositions of types using the `|` operator to mean "this type or that type".
@@ -312,4 +316,26 @@ type Widget =
     name: str @Required
         
     size: int @Deprecated @Required
+```
+
+### Importing other modules
+
+A Ribo module is scoped to the file it is defined within.
+Other modules can be imported into the current module using the `import` statement.
+
+```
+# other_module.ribo:
+type Widget = (name: str, size: int)
+```
+
+```
+import "some_path/other_module.ribo" as m2 # Import whole module into a namespace
+
+m2.Widget("my widget", 42)
+```
+
+```
+import from "some_path/other_module.ribo" Widget # Import specific entities into current namespace
+
+Widget("my widget", 42)
 ```
