@@ -11,6 +11,7 @@ But Ribo doesn't exist in a vacuum.
 Just as JSON is a declarative subset of Javascript, 
 Ribo is a declarative subset of a family of languages, 
 with the head of the family being [Pheno](https://pheno-lang.org).
+With only one or two minor exceptions (noted at the time), everything you read here is equally valid for Pheno, too.
 
 ## A Tour of Ribo
 
@@ -51,12 +52,11 @@ datetimes: datetime = 2018/05/15T19:16:00Z
 With type inference you'll rarely have to specify types where it wouldn't otherwise be needed.
 
 
-Ribo also supports four container types:
+Ribo also supports three container types:
 
 ```
 arrays: [int] = [1, 2, 3]
 dicts: [str: int] = ["one": 1, "two": 2, "three": 3]
-sets: set<int> = set([1, 2, 3])
 optionals: str? = "another string"
 ```
 
@@ -68,7 +68,7 @@ but more accurately they are examples of sum types, which we'll introduce in a m
 
 Before we do that we should introduce the multiline format for containers.
 Ribo is an indentation sensitive language (like Python or OCaml).
-So those first three container examples could also be written (and this time without the annotations):
+So those first two container examples could also be written (and this time without the annotations):
 
 ```
 arrays =
@@ -80,14 +80,8 @@ dicts =
     "one": 1
     "two": 2
     "three": 3
-
-sets = set
-    1
-    2
-    3
 ```
 Notice that the comma separators are not necessary in this format. Neither are the square brackets.
-The round brackets for the set constructor are also optional (in both singleline and multiline formats).
 This has implications for arrays of objects, as we'll see in a moment, but where each element is unambiguously single line the only sepatator necessary is the newline itself.
 
 ### Custom types
@@ -139,7 +133,7 @@ let my_tuple = MyTuple(42, "unnamed")
 ```
 
 As well as product types Ribo supports "Sum Types". 
-These are often also called Discriminated or Tagged Unions, Variants or event "enums".
+These are often also called Discriminated or Tagged Unions, Variants or even "enums".
 The latter is becoming common in languages like Rust or Swift, but may be confusing if you come from most C-family languages.
 A Sum Type is a sequence of fields of some other type - just like a product type - 
 except rather than having *all* the field values it only has one at a time.
@@ -172,31 +166,26 @@ The subtype is Contact.Email but we can use partial inference (with the leading 
 Notice, also, that we can define product types inline (the type of Phone), without needing to create a type binding up front.
 
 So Sum Types are just compositions of types using the `|` operator to mean "this type or that type".
-We can also compose types using the `&` operator to mean "this type *and* that type".
-This is known as an "Intersection Type":
+This is in contrast to Product Types, which use `,` to mean, "this type AND that type AND in this order".
+That last part (the ordering) is why we don't use `&` - which mathematically would imply commutativity.
+Order matters for product types, so `,` sequence the fields (`&` is used in some languages, like TypeScript, for "Intersection Types").
 
+Product types can also extend subtypes by using the "spread operator": `...`:
 ```
-type A = (name: str)
-type B = (size: int)
-type C = A & B
-```
-
-Intersection types may only compose composite types (ie those with one or more fields).
-So you can't compose, say, `str` and `int` this way.
-
-If fields with the same name exist in more than one arm of an intersection type then the later one overrides the earlier one.
-Because types may be composed without needing named bindings we can use intersection types to extend existing types with new fields
-(like OO inheritence).
-E.g.
-
-```
-type A = (name: str)
-type B = A & (size: int)
-
-let b = B("Extended", 42)
+type Point = (x: int, y: int)
+type Point3D = (...Point, z: int) # same as (x: int, y: int, z: int)
 ```
 
-Notice, also, that intersection types still get constructors do memberwise initialisation.
+Prefixing a type name with `...` effectively says, "expand the fields of this type, here".
+It allows us to resuse existing types in a way similar to inheritance in objected-oriented languages - but without any behaviours being inherited (Ribo doesn't have behaviours, but the same syntax can be used in Pheno, which does. In Pheno, behavioural reuse is achieved with traits). 
+
+Just be careful that all field names are unique as this is an error otherwise.
+
+Types composed with the spread operator still get constructors that do memberwise initialisation.
+
+```
+let point = Point3D(1, 2, 3)
+```
 
 Talking of those constructors, as well as positional arguments, as we have been using, 
 they also take named arguments:
