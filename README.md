@@ -10,7 +10,7 @@ Think something like JSON or YAML - but with types. And nicer.
 But Ribo doesn't exist in a vacuum. 
 Just as JSON is a declarative subset of Javascript, 
 Ribo is a declarative subset of a family of languages, 
-with the head of the family being [Pheno](https://pheno-lang.org).
+with the head of the family being [Pheno](http://pheno-lang.org).
 With only one or two minor exceptions (noted at the time), everything you read here is equally valid for Pheno, too.
 
 ## A Tour of Ribo
