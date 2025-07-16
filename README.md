@@ -154,30 +154,31 @@ type Contact:
     
 let contact1 = Contact.None
 let contact2 = Contact.Phone(123, 4567890)
-let contact3 : Contact.Email = "abc@example.com"
-let contact4 : Contact = .Email("abc@example.com")
+let contact3 : Contact = .Email("abc@example.com")
 ```
 
-Notice the type inference at play at multiple levels. With Phone we infer the whole type from the constructor.
-With Email, for contact3, we annotate the qualified subtype, so supply just the arguments (round brackets optional).
-For contact4 we annotate just the Sum type, so need to specify the subtype for the constructor. 
-The subtype is Contact.Email but we can use partial inference (with the leading `.`) to elide the Contact.
+Notice the type inference at play at multiple levels. With None and Phone, we infer the sum type from the constructor.
+With Email, we annotate just Sum type, so need to specify the variant constructor. Note the leading `.` to show we're inferring the type. 
 
 Notice, also, that we can define product types inline (the type of Phone), without needing to create a type binding up front.
 
-So Sum Types are just compositions of types using the `|` operator to mean "this type or that type".
-This is in contrast to Product Types, which use `,` to mean, "this type AND that type AND in this order".
-That last part (the ordering) is why we don't use `&` - which mathematically would imply commutativity.
-Order matters for product types, so `,` sequence the fields (`&` is used in some languages, like TypeScript, for "Intersection Types").
+So Sum Types are just compositions of fields using the `|` operator to mean "this value OR that value".
+This is in contrast to Product Types, which use `,` to mean, "this value AND that value". So why not use `&`?
+`&` is commutative, which in this case would imply that ordering didn't matter.
+But in Product Types the fields are ordered, so we use the sequencing operator, `,`.
 
-Product types can also extend subtypes by using the "spread operator": `...`:
+Some languages, like TypeScript, do use `&` to compose types. These are called "Intersection Types" and allow separate types to be combined into new types. The concept of intersecting types works best in a structurally typed context. 
+Ribo is nominally typed (types have identities bound to their names) so Intersection Types are not a good fit.
+But the idea of combining types is useful. Object Oriented languages usually achieve this using inheritance - but that implies hierarchy, common behaviour - and potentially polymorphism.
+
+So in Ribo we can also compose types using the "spread operator": `...`:
 ```
 type Point = (x: int, y: int)
 type Point3D = (...Point, z: int) # same as (x: int, y: int, z: int)
 ```
 
 Prefixing a type name with `...` effectively says, "expand the fields of this type, here".
-It allows us to resuse existing types in a way similar to inheritance in objected-oriented languages - but without any behaviours being inherited (Ribo doesn't have behaviours, but the same syntax can be used in Pheno, which does. In Pheno, behavioural reuse is achieved with traits). 
+It allows us to reuse existing types in a way similar to inheritance - but without any behaviours being inherited (Ribo doesn't have behaviours, but the same syntax can be used in Pheno, which does. In Pheno, behavioural reuse is achieved with traits). 
 
 Just be careful that all field names are unique as this is an error otherwise.
 
@@ -198,7 +199,7 @@ Notice that `:` is used to bind an argument name to a value.
 
 Named and positional arguments may be mixed but, as is usual in languages with this support,
 all positional arguments must come first, followed by any named arguments.
-Any arguments not specified either positionally or by name take their default values, if any - 
+Any arguments that are not specified, either positionally or by name, take their default values, if any - 
 otherwise it is an error.
 
 ### Multiline considerations
