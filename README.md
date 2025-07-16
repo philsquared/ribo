@@ -154,7 +154,7 @@ type Contact:
     
 let contact1 = Contact.None
 let contact2 = Contact.Phone(123, 4567890)
-let contact3 : Contact.Email ="abc@example.com"
+let contact3 : Contact = .Email("abc@example.com")
 ```
 
 Notice the type inference at play at multiple levels. With None and Phone, we infer the sum type from the constructor.
