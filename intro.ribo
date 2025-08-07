@@ -1,0 +1,302 @@
+# Comments
+
+# <- This is the comment character in Ribo.
+# It works just as you're probably familiar with from many other languages.
+# Except when found within strings, anything after a # character is ignored until the end of the line.
+
+# Built-in Types
+
+# Ribo has a set of built-in types, similar to JSON, but with the addition of date/time types:
+
+booleans = true
+integers = 42
+floats = 3.141
+strings = "hello"
+dates = 2018/05/15
+times = 19:16:00Z
+datetimes = 2018/05/15T19:16:00Z # UTC/ ISO 8601 format
+
+# Unlike, JSON, however, these are static types, and can be explicitly annotated:
+
+booleans: bool = true
+integers: int = 42
+floats: float = 3.141
+strings: str = "hello"
+dates: date = 2018/05/15
+times: time = 19:16:00Z
+datetimes: datetime = 2018/05/15T19:16:00Z
+
+# But with type inference you'll rarely have to specify types where it wouldn't otherwise be needed.
+
+# Ribo also supports two container types, and their associated literal syntax:
+
+arrays: [int] = [1, 2, 3]
+dicts: [str: int] = ["one": 1, "two": 2, "three": 3]
+
+# Again, the type annotations are usually optional, certainly when literals are used
+
+# One more type (or type class) that could be considered a container of zero or one elements, 
+# is the `optional` type modifier. To make any type optional, just add the ? suffix
+
+opt_string: str? = "an optional string"
+empty_opt: str? = () # () is the "unit type" and is used to indicate the lack of a value
+
+# Ribo is a sigificant-indentation language. 
+# Like Python or YAML, structure is through indentation rather than braces or other delimiters
+# Unlike Python, only spaces may be used (tabs are disallowed).
+# Complex expressions (such as container literals) have an alternate multiline format:
+
+arrays_ml =
+    1
+    2
+    3
+
+dicts_ml = 
+    "one": 1
+    "two": 2
+    "three": 3
+
+# Note that as well as dropping the [ and ], no commas are needed for separating values - 
+# just newlines. Like YAML this requires some extra syntax for arrays of objects, 
+# but we'll need to talk about objects first.
+
+
+# Custom types
+
+# While you can use arrays and dicts, along with the built-in types, 
+# to do anything you can do in JSON or YAML, Ribo really shines when you write your 
+# own custom types and create objects from them. 
+# This gives you a built in schema definition, with validation, 
+# as well as code completion and other tooling opportunities.
+# In fact it opens up all sorts of things as we'll see later.
+
+# But we also want to keep things lightweight and succinct. 
+# So we have just one keyword to introduce a type (technically a type *binding*) - 
+# and that's the `type` keyword.
+# Then give it a name and associate it with a definition. 
+# The simplest is what we might call a record type, which is just a sequence of fields.
+# Each field has a name, an optional type and and optional (default) value (you need one or the other).
+
+type Widget =
+    name: str
+    size = 42 # Inferred as an int
+
+# If it's small we could write it on one line:
+
+type Widget = name: str, size = 42
+
+# Earlier we created variables with <name> (: <type>) (= <value>) syntax.
+# That works for fields, but at the top level you would need to use the `let` keyword:
+
+let x = 42
+
+# With this we can create instances (objects) of our types:
+let widget = Widget("My widget", 42)
+
+# If the type is already known, it can be omitted and inferred:
+let widget2 : Widget = ("Inferred widget", 9)
+
+# That doesn't seem to save much here, because we still had to spell out that it's Widget.
+# But if you have a more complex object this is more useful:
+
+type Gadget =
+    widget: Widget
+    height: int
+
+let gadget = Gadget(("widget"), 7)
+
+# Note we let size have its default value. We can also write this in multiline form:
+
+let gadget : Gadget =
+    ("widget")
+    7
+
+# or even:
+
+let gadget =
+    Gadget:
+        Widget:
+            "widget"
+            42
+        7
+
+# Such record types may also be referred to as Product Types, as part of a general
+# framework of Algebraic Data Types. In addition to Product Types, Ribo supports Sum Types.
+# Where Product Types are represented by a sequence of fields 
+# (so domain of possible values is the sum of the domain of the fields)
+# Sum types are represented by a "choice" of fields. THe value is one of the fields, but not all.
+
+type CardSuits = Clubs | Spades | Hearts | Diamonds
+
+# In the simplest case each type has no fields, so is comparable to an enum in most C-based languages,
+# But each type may be arbitrarily complex, for example:
+
+type Contact:
+    | None
+    | Phone: (area: int, number: int)
+    | Email: str
+    
+let contact1 = Contact.None
+let contact2 = Contact.Phone(123, 4567890)
+let contact3 : Contact = .Email("abc@example.com")
+
+# Alternate fields are separated by a `|`. 
+# In the multiline form it is usual to prefix even the first alternate with `|`
+# Beyond that they are just (algebraic data) types.
+
+# Notice we can define the field types inline
+
+# You might wonder why, if sum types use `|` to separate fields, why do product types not use '&'?
+# In fact `&` would imply that ordering is irrelevant, whereas product types fields are ordered,
+# so the sequencing operator, `,` is used. 
+# `&` is used in some languages to "merge" complex types together (intersection types).
+# Ribo supports a similar idea with the "spread operator", `...`:
+
+type Point = (x: int, y: int)
+type Point3D = (...Point, z: int) # same as (x: int, y: int, z: int)
+
+# It's not exactly the same thing.
+# Intersection types work best with (dynamic) structurally typed languages.
+# Ribo is "nominally typed", so type names imply identity.
+# The spread operator allows us to construct new types from existing ones.
+
+# Prefixing a type name with ... effectively says, "expand the fields of this type, here".
+# It allows us to reuse existing types in a way similar to inheritance - 
+# but without any behaviours being inherited 
+# (Ribo doesn't have behaviours, 
+# but the same syntax can be used in Pheno, which does. 
+# In Pheno, behavioural reuse is achieved through traits).
+
+# Just be careful that all field names are unique as this is an error otherwise.
+
+# Types composed with the spread operator still get constructors that do memberwise initialisation.
+
+let point = Point3D(1, 2, 3)
+
+# alking of those constructors, as well as positional arguments, as we have been using, 
+# they also take named arguments:
+
+let b = B(name: "Extended", size: 42)
+
+# Notice that : is used to bind an argument name to a value.
+
+# Named and positional arguments may be mixed but, 
+# as is usual in languages with this support, all positional arguments must come first, 
+# followed by any named arguments. 
+# Any arguments that are not specified, either positionally or by name, 
+# take their default values, if any - otherwise it is an error.
+
+# Most types of expressions or statements have a single line and a multiline form
+# and we have seen most of them already.
+
+# Arrays of object literals need some extra explanation.
+
+# Given:
+
+type Widget = (name: str, size: int)
+
+# An array of widgets may be written
+
+let widgets =
+    Widget("one", 1)
+    Widget("two", 2)
+    Widget("three", 3)
+
+# But repeating Widget a lot may get tedious, so we may want to use type inference:
+
+let widgets : [Widget]=
+    ("one", 1)
+    ("two", 2)
+    ("three", 3)
+
+# that also works. The round brackets make it unambiguous that each line is a separate element. 
+# But if we want to write the object constructors over multiple lines, too, 
+# we might try to write:
+
+let widgets: [Widget] =
+  "one"
+  1
+  "two"
+  2
+  "three"
+  3
+
+# This could be made to work for this case but 
+# (a) gets hard to read and 
+# (b) breaks down when you have optional fields. 
+# Instead we introduce a special "object separator" syntax.
+# This involves write two or more - characters on a line as a separator:
+
+let widgets: [Widget] =
+  "one"
+  1
+  --
+  "two"
+  2
+  --
+  "three"
+  3
+
+# This is somewhat similar to YAML's - prefix for each object but 
+# (a) is used as a separator with no extra indentation and 
+# (b) is only necessary for arrays of objects in this multiline of multiline formats.
+
+## Attributes
+
+# Any value literal can be passed to the processor as metadata by 
+# prefixing it with the @ character. This is most commonly applied to constructors, e.g.
+
+type Name = (:str)
+
+type Widget =
+    @Name("Widget's name)
+    name: str
+
+    @Name("Widget's size")
+    size: int
+
+# Because round brackets are optional when unambigous, 
+# unit types (anything that evaluates to ()) are often used as marker attributes:
+
+type Deprecated = ()
+type Required = ()
+
+type Widget =
+    @Required
+    name: str
+    
+    @Deprecated
+    @Required
+    size: int
+
+# For types, attributes must always precede the type binding.
+# For fields attributes may either precede the whole field (on the same or preceding lines),
+# or trail the field on the same line:
+
+@Deprecated
+type Widget =    
+    @Name("Widget's name)
+    name: str @Required
+        
+    size: int @Deprecated @Required
+
+## Importing other modules
+
+# A Ribo module is scoped to the file it is defined within.
+# Other modules can be imported into the current module using the import statement.
+
+# other_module.ribo:
+type Widget = (name: str, size: int)
+
+
+# Import whole module into a namespace
+import "some_path/other_module.ribo" as m2
+
+m2.Widget("my widget", 42)
+
+
+# Import specific entities into current namespace
+import from "some_path/other_module.ribo" Widget 
+
+Widget("my widget", 42)
+
