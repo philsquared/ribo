@@ -26,14 +26,20 @@ dates: date = 2018/05/15
 times: time = 19:16:00Z
 datetimes: datetime = 2018/05/15T19:16:00Z
 
-# But with type inference you'll rarely have to specify types where it wouldn't otherwise be needed.
+# But with type inference you'll rarely have to specify types where they wouldn't otherwise be needed.
 
-# Ribo also supports two container types, and their associated literal syntax:
+# Ribo also supports three container types, and their associated literal syntax:
 
 arrays: [int] = [1, 2, 3]
-dicts: [str: int] = ["one": 1, "two": 2, "three": 3]
+sets: {int} = {1, 2, 3}
+maps: {str: int} = {"one": 1, "two": 2, "three": 3}
 
 # Again, the type annotations are usually optional, certainly when literals are used
+# Containers also have empty literals
+
+empty_array = []
+empty_set: {}
+empty_map = {:}
 
 # One more type (or type class) that could be considered a container of zero or one elements, 
 # is the `optional` type modifier. To make any type optional, just add the ? suffix
@@ -41,7 +47,7 @@ dicts: [str: int] = ["one": 1, "two": 2, "three": 3]
 opt_string: str? = "an optional string"
 empty_opt: str? = () # () is the "unit type" and is used to indicate the lack of a value
 
-# Ribo is a sigificant-indentation language. 
+# Ribo is a significant-indentation language.
 # Like Python or YAML, structure is through indentation rather than braces or other delimiters
 # Unlike Python, only spaces may be used (tabs are disallowed).
 # Complex expressions (such as container literals) have an alternate multiline format:
@@ -51,22 +57,22 @@ arrays_ml =
     2
     3
 
-dicts_ml = 
+maps_ml =
     "one": 1
     "two": 2
     "three": 3
 
-# Note that as well as dropping the [ and ], no commas are needed for separating values - 
+# Note that as well as dropping the brackets, no commas are needed for separating values -
 # just newlines. Like YAML this requires some extra syntax for arrays of objects, 
 # but we'll need to talk about objects first.
 
 
 # Custom types
 
-# While you can use arrays and dicts, along with the built-in types, 
+# While you can use arrays, sets and maps, along with the built-in types,
 # to do anything you can do in JSON or YAML, Ribo really shines when you write your 
 # own custom types and create objects from them. 
-# This gives you a built in schema definition, with validation, 
+# This gives you a built-in schema definition, with validation,
 # as well as code completion and other tooling opportunities.
 # In fact it opens up all sorts of things as we'll see later.
 
@@ -81,7 +87,7 @@ type Widget =
     name: str
     size = 42 # Inferred as an int
 
-# If it's small we could write it on one line:
+# If it's small, we could write it on one line:
 
 type Widget = name: str, size = 42
 
@@ -93,7 +99,7 @@ let x = 42
 # With this we can create instances (objects) of our types:
 let widget = Widget("My widget", 42)
 
-# If the type is already known, it can be omitted and inferred:
+# If the type is already known, it may be omitted and inferred:
 let widget2 : Widget = ("Inferred widget", 9)
 
 # That doesn't seem to save much here, because we still had to spell out that it's Widget.
@@ -123,8 +129,8 @@ let gadget =
 # Such record types may also be referred to as Product Types, as part of a general
 # framework of Algebraic Data Types. In addition to Product Types, Ribo supports Sum Types.
 # Where Product Types are represented by a sequence of fields 
-# (so domain of possible values is the sum of the domain of the fields)
-# Sum types are represented by a "choice" of fields. THe value is one of the fields, but not all.
+# (so the domain of possible values is the sum of the domains of the fields)
+# Sum types are represented by a "choice" of fields. The value is one of the fields, but not all.
 
 type CardSuits = Clubs | Spades | Hearts | Diamonds
 
@@ -141,7 +147,7 @@ let contact2 = Contact.Phone(123, 4567890)
 let contact3 : Contact = .Email("abc@example.com")
 
 # Alternate fields are separated by a `|`. 
-# In the multiline form it is usual to prefix even the first alternate with `|`
+# In the multiline form it is usual to prefix even the first alternate with `|` (like most ML-based languages)
 # Beyond that they are just (algebraic data) types.
 
 # Notice we can define the field types inline
@@ -173,7 +179,7 @@ type Point3D = (...Point, z: int) # same as (x: int, y: int, z: int)
 
 let point = Point3D(1, 2, 3)
 
-# alking of those constructors, as well as positional arguments, as we have been using, 
+# talking of those constructors - as well as positional arguments, as we have been using,
 # they also take named arguments:
 
 let b = B(name: "Extended", size: 42)
@@ -202,7 +208,7 @@ let widgets =
     Widget("two", 2)
     Widget("three", 3)
 
-# But repeating Widget a lot may get tedious, so we may want to use type inference:
+# But repeating Widget a lot may get tedious, so we might want to use type inference:
 
 let widgets : [Widget]=
     ("one", 1)
@@ -225,7 +231,7 @@ let widgets: [Widget] =
 # (a) gets hard to read and 
 # (b) breaks down when you have optional fields. 
 # Instead we introduce a special "object separator" syntax.
-# This involves write two or more - characters on a line as a separator:
+# This involves writing two or more - characters on a line as a separator:
 
 let widgets: [Widget] =
   "one"
@@ -255,8 +261,8 @@ type Widget =
     @Name("Widget's size")
     size: int
 
-# Because round brackets are optional when unambigous, 
-# unit types (anything that evaluates to ()) are often used as marker attributes:
+# Because round brackets are optional when unambiguous,
+# unit types (anything that evaluates to ()) can be used as marker attributes:
 
 type Deprecated = ()
 type Required = ()
@@ -283,7 +289,7 @@ type Widget =
 ## Importing other modules
 
 # A Ribo module is scoped to the file it is defined within.
-# Other modules can be imported into the current module using the import statement.
+# Other modules may be imported into the current module using the import statement.
 
 # other_module.ribo:
 type Widget = (name: str, size: int)
@@ -299,4 +305,3 @@ m2.Widget("my widget", 42)
 import from "some_path/other_module.ribo" Widget 
 
 Widget("my widget", 42)
-
