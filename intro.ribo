@@ -137,7 +137,7 @@ type CardSuits = Clubs | Spades | Hearts | Diamonds
 # In the simplest case each type has no fields, so is comparable to an enum in most C-based languages,
 # But each type may be arbitrarily complex, for example:
 
-type Contact:
+type Contact =
     | None
     | Phone: (area: int, number: int)
     | Email: str
