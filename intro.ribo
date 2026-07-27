@@ -31,15 +31,15 @@ datetimes: datetime = 2018/05/15T19:16:00Z
 # Ribo also supports three container types, and their associated literal syntax:
 
 arrays: [int] = [1, 2, 3]
-sets: {int} = {1, 2, 3}
-maps: {str: int} = {"one": 1, "two": 2, "three": 3}
+dicts: [str: int] = ["one": 1, "two": 2, "three": 3]
+sets: set<int> = set(1, 2, 3)
 
 # Again, the type annotations are usually optional, certainly when literals are used
 # Containers also have empty literals
 
 empty_array = []
-empty_set: {}
-empty_map = {:}
+empty_map = [:]
+empty_set: set()
 
 # One more type (or type class) that could be considered a container of zero or one elements, 
 # is the `optional` type modifier. To make any type optional, just add the ? suffix
@@ -182,11 +182,9 @@ let point = Point3D(1, 2, 3)
 # talking of those constructors - as well as positional arguments, as we have been using,
 # they also take named arguments:
 
-let b = B(name: "Extended", size: 42)
+let b = B(name = "Extended", size = 42)
 
-# Notice that : is used to bind an argument name to a value.
-
-# Named and positional arguments may be mixed but, 
+# Named and positional arguments may be mixed but,
 # as is usual in languages with this support, all positional arguments must come first, 
 # followed by any named arguments. 
 # Any arguments that are not specified, either positionally or by name, 
